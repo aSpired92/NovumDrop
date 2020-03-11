@@ -1,0 +1,4 @@
+name: PluginDrop
+version: ${project.version}
+main: pluginy.plugindrop.PluginDrop
+api-version: 1.13

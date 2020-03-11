@@ -1,0 +1,4 @@
+name: PluginDrop
+version: 1.0-SNAPSHOT
+main: pluginy.plugindrop.PluginDrop
+api-version: 1.13
