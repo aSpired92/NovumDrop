@@ -42,7 +42,6 @@ public final class PluginDrop extends JavaPlugin implements Listener {
             {},
             {},
             {},
-
     };
     @Override
     public void onEnable()
@@ -58,6 +57,8 @@ public final class PluginDrop extends JavaPlugin implements Listener {
         dropsy.add(new ItemStack(OBSIDIAN,1));
         dropsy.add(new ItemStack(ENDER_PEARL,1));
         dropsy.add(new ItemStack(TNT,1));
+        dropsy.add(new ItemStack(GUNPOWDER,1));
+        dropsy.add(new ItemStack(SLIME_BALL,1));
 
 
 
