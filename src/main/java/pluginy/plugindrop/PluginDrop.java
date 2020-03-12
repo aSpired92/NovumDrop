@@ -21,17 +21,28 @@ import static org.bukkit.Material.*;
 public final class PluginDrop extends JavaPlugin implements Listener {
 
     ArrayList<ItemStack> dropsy = new ArrayList<ItemStack>();
+
     Material[] droppingBlocks = {
-            STONE,
-            IRON_ORE,
-            COAL_ORE,
-            DIAMOND_ORE,
-            EMERALD_ORE,
-            GOLD_ORE,
-            LAPIS_ORE,
-            ANDESITE,
-            DIORITE,
-            GRANITE
+            STONE, //1
+            IRON_ORE, //2
+            COAL_ORE, //3
+            DIAMOND_ORE, //4
+            EMERALD_ORE, //5
+            GOLD_ORE, //6
+            LAPIS_ORE, //7
+            ANDESITE, //8
+            DIORITE, //9
+            GRANITE //10
+    };
+
+    int[][] chances = {
+            {120,50,150,100,300,250,140,100, 5,1,20,10}, //Gracz
+            {150,80,190,130,310,300,180,200,10,3,40,15}, //VIP
+            {},
+            {},
+            {},
+            {},
+
     };
     @Override
     public void onEnable()
@@ -70,7 +81,7 @@ public final class PluginDrop extends JavaPlugin implements Listener {
         if(contains(droppingBlocks,cube.getType()))
         {
             gracz.getInventory().addItem(dropsy.get(rand.nextInt(dropsy.size())));
-            //cube.getWorld().dropItemNaturally(cube.getLocation(), dropsy.get(0));
+
         }
     }
 }
