@@ -10,7 +10,7 @@ import org.bukkit.inventory.Inventory;
 public class Commands implements CommandExecutor {
 
 
-    public Inventory dropmenu = Bukkit.createInventory(null, 18, "Ustawienia Dropu");
+    public Inventory dropmenu = Bukkit.createInventory(null, 36, "NovumDrop");
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args)
