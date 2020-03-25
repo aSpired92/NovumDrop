@@ -12,10 +12,13 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.permissions.Permission;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
+import static org.bukkit.event.inventory.InventoryAction.*;
 import static org.bukkit.event.inventory.InventoryType.*;
 import static org.apache.commons.lang.ArrayUtils.contains;
 import static org.apache.commons.lang.ArrayUtils.indexOf;
@@ -23,6 +26,12 @@ import static org.bukkit.Material.*;
 
 
 public class Events implements Listener {
+
+
+    ArrayList<Permission> permisje = new ArrayList<Permission>();
+
+
+
 
     public int[] bonuses = {
             2,
@@ -76,7 +85,7 @@ public class Events implements Listener {
     };
 
     boolean[] enabled = {
-            false, //Diamond
+            true, //Diamond
             true, //Gold
             true, //Iron
             true, //Emerald
@@ -93,7 +102,7 @@ public class Events implements Listener {
 
     ArrayList<ItemStack> dropsy = new ArrayList<ItemStack>();
 
-    int[][] chances = {
+    float[][] chances = {
             {120, 50,150,100,300,250,140,100, 5, 1, 20,10,10000}, //Gracz
             {150, 80,190,130,310,300,180,200,10, 3, 40,15,10000}, //VIP
             {200,100,230,150,320,310,200,300,15, 5, 60,20,10000}, //sVIP
@@ -109,89 +118,107 @@ public class Events implements Listener {
         Player gracz = event.getPlayer();
         Block cube = event.getBlock();
         event.setDropItems(false);
+        int ranga = 0;
+        for(int i = 0; i < permisje.size(); i++)
+        {
+            if (gracz.hasPermission(permisje.get(i)))
+                ranga = i;
+        }
+
 
         if(contains(droppingBlocks,cube.getType()))
         {
+
+            int toollvl = event.getPlayer().getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS);
             for(int i = 0; i < dropsy.size(); i++)
             {
-                int szansa = chances[1][i];
-                int toollvl = event.getPlayer().getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS);
+                int ranchance = new Random().nextInt(10000);
+                float szansa = chances[ranga][i];
                 if (toollvl > 0) szansa += bonuses[toollvl-1]*100;
-                int ranchance = new Random().nextInt(1000);
                 if (szansa >= ranchance && enabled[i] == true)
                     gracz.getInventory().addItem(dropsy.get(i));
             }
+
         }
+
     }
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event)
     {
-        if(!event.isLeftClick() && event.getClickedInventory().getType() != PLAYER)
+        if(event.getView().getTitle() == "NovumDrop")
         {
-            event.setCancelled(true);
-            return;
+            Inventory inventory = event.getClickedInventory(); // The inventory that was clicked in
+            ItemStack item = event.getCurrentItem(); // The item that was clicked
+            int slot = event.getRawSlot();
+            Player gracz = (Player) event.getWhoClicked(); // The player that clicked the item
+            gracz.sendMessage(event.getAction().toString() + " " + event.getClickedInventory().getType().toString() + " " + event.getClickedInventory().toString() + " " + event.getView().getTitle() + " " + slot);
+
+            if (slot >= inventory.getSize() + 36 || slot < 0 || item == null || item.getType() == AIR || event.getAction() == MOVE_TO_OTHER_INVENTORY)
+            {
+                event.setCancelled(true);
+                return;
+            }
+
+
+
+
+
+            if(event.getClickedInventory().getType() != PLAYER)event.setCancelled(true);
+
+            if (event.isLeftClick() && event.getClickedInventory().getType() != PLAYER)
+            {
+                
+
+                if (contains(slots,slot))
+                {
+                    int index = indexOf(droppingitems,item.getType());
+
+                    inventory.remove(item);
+                    ItemStack menuitem = new ItemStack(droppingitems[index],1);
+
+                    if (enabled[index])
+                    {
+                        gracz.sendMessage(PluginDrop.messageData.get("WylaczenieDropu") + " " + item.getItemMeta().getDisplayName());
+                        enabled[index] = false;
+                        SetItemLore(menuitem,PluginDrop.infoDrop(index,false));
+                    }
+                    else
+                    {
+                        gracz.sendMessage(PluginDrop.messageData.get("WlaczenieDropu") + " " + item.getItemMeta().getDisplayName());
+                        enabled[index] = true;
+                        SetItemLore(menuitem,PluginDrop.infoDrop(index,true));
+                    }
+                    inventory.setItem(slot,menuitem);
+                }
+                else if (slot == 34)
+                {
+                    for (int i = 0; i < enabled.length; i++)
+                    {
+                        enabled[i] = true;
+                        SetItemLore(inventory.getItem(slots[i]),PluginDrop.infoDrop(i,true));
+                    }
+                    gracz.sendMessage(PluginDrop.messageData.get("WlaczWszystko"));
+                }
+                else if (slot == 35)
+                {
+                    for (int i = 0; i < slots.length; i++)
+                    {
+                        enabled[i] = false;
+                        SetItemLore(inventory.getItem(slots[i]),PluginDrop.infoDrop(i,false));
+                    }
+                    gracz.sendMessage(PluginDrop.messageData.get("WylaczWszystko"));
+                }
+            }
         }
-
-        Player gracz = (Player) event.getWhoClicked(); // The player that clicked the item
-        ItemStack item = event.getCurrentItem(); // The item that was clicked
-        Inventory inventory = event.getInventory(); // The inventory that was clicked in
-        int slot = event.getSlot();
-
-        if (event.getView().getTitle() == "NovumDrop" && event.getClickedInventory().getType() != PLAYER)
-        {
-            event.setCancelled(true); // Make it so the dirt is back in its original spot
-
-            if (contains(slots,slot))
-            {
-                int index = indexOf(droppingitems,item.getType());
-
-                inventory.remove(item);
-                ItemStack menuitem = new ItemStack(droppingitems[index],1);
-                ItemMeta mitemmeta = menuitem.getItemMeta();
-                if (enabled[index])
-                {
-                    gracz.sendMessage("Wyłączyłeś drop " + droppingitems[index].toString());
-                    enabled[index] = false;
-                    mitemmeta.setDisplayName("OFF");
-                }
-                else
-                {
-                    gracz.sendMessage("Włączyłeś drop " + droppingitems[index].toString());
-                    enabled[index] = true;
-                    mitemmeta.setDisplayName("ON");
-                }
-                menuitem.setItemMeta(mitemmeta);
-                inventory.setItem(slot,menuitem);
-            }
-            else if (slot == 34)
-            {
-                for (int i = 0; i < enabled.length; i++)
-                {
-                    enabled[i] = true;
-                    SetItemName(inventory.getItem(slots[i]),"ON");
-                }
-                gracz.sendMessage("Włączyłeś wszystkie materiały dropu");
-            }
-            else if (slot == 35)
-            {
-                for (int i = 0; i < slots.length; i++)
-                {
-                    enabled[i] = false;
-                    SetItemName(inventory.getItem(slots[i]),"OFF");
-                }
-                gracz.sendMessage("Wyłączyłeś wszystkie materiały dropu");
-            }
-        }
-
 
     }
 
-    public static void AddToMenu(Material material, int menuslot, Inventory menu, String opis)
+    public static void AddToMenu(Material material, int menuslot, Inventory menu, List<String> opis)
     {
         ItemStack item = new ItemStack(material,1);
         ItemMeta mitemmeta = item.getItemMeta();
-        mitemmeta.setDisplayName(opis);
+        mitemmeta.setLore(opis);
         item.setItemMeta(mitemmeta);
         menu.setItem(menuslot,item);
     }
@@ -200,6 +227,13 @@ public class Events implements Listener {
     {
         ItemMeta mitemmeta = item.getItemMeta();
         mitemmeta.setDisplayName(opis);
+        item.setItemMeta(mitemmeta);
+    }
+
+    public static void SetItemLore(ItemStack item, List<String> opis)
+    {
+        ItemMeta mitemmeta = item.getItemMeta();
+        mitemmeta.setLore(opis);
         item.setItemMeta(mitemmeta);
     }
 }

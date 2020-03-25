@@ -6,3 +6,14 @@ commands:
    drop:
     description: Ustawienia dropu
     usage: /drop
+
+      # {NAZWA PRZEDMIOTU}
+      #
+      #	Szansa:	{SZANSA GRACZ}
+      #	Szansa VIP: {SZANSA VIP}
+      #	Szansa sVIP: {SZANSA sVIP}
+      #	Szansa eVIP: {SZANSA eVIP}
+      #	Szansa YouTuber: {SZANSA YOUTUBER}
+      #	Sznasa Sponsor: {SZANSA SPONSOR}
+      #
+      #	Status dropu: {STATUS DROPU WŁ/WYŁ}

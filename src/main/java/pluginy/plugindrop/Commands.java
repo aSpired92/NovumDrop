@@ -10,7 +10,7 @@ import org.bukkit.inventory.Inventory;
 public class Commands implements CommandExecutor {
 
 
-    public Inventory dropmenu = Bukkit.createInventory(null, 36, "NovumDrop");
+    public static Inventory dropmenu = Bukkit.createInventory(null, 36, "NovumDrop");
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args)
@@ -18,7 +18,6 @@ public class Commands implements CommandExecutor {
         if (sender instanceof Player)
         {
             Player gracz = (Player) sender;
-            gracz.getServer().broadcastMessage("DROOOOOOOP");
             gracz.openInventory(dropmenu);
             return true;
         }
