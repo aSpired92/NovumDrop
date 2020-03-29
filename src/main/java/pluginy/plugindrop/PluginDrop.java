@@ -3,12 +3,16 @@ package pluginy.plugindrop;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.permissions.Permission;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitScheduler;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,13 +24,15 @@ import static org.bukkit.Material.*;
 import static org.bukkit.enchantments.Enchantment.*;
 import static org.bukkit.inventory.ItemFlag.*;
 
-public final class PluginDrop extends JavaPlugin {
+public final class PluginDrop extends JavaPlugin implements Plugin {
 
 
-    private static Events events = new Events();
-    Commands commands = new Commands();
+    public static Events events;
+    public static Commands commands;
 
 
+
+    public static ItemStack[] menucontent;
     public static HashMap<String, String> messageData = new HashMap<String, String>();
     public File f = new File(getDataFolder()+File.separator+"messages.yml");
 
@@ -44,6 +50,11 @@ public final class PluginDrop extends JavaPlugin {
     @Override
     public void onEnable()
     {
+        events = new Events(this);
+        commands = new Commands(this);
+
+        getCommand("drop").setExecutor(commands);
+
         String[] permnames = {
                 "Gracz",
                 "VIP",
@@ -68,8 +79,8 @@ public final class PluginDrop extends JavaPlugin {
         setMessage("WylaczenieDropu", "Wyłączyłeś drop");
         setMessage("WlaczWszystko", "Włączyłeś wszystko");
         setMessage("WylaczWszystko", "Wyłączyłeś wszystko");
-        setMessage("PrzyciskWlaczWszystko", "Włączyłeś wszystko");
-        setMessage("PrzyciskWylaczWszystko", "Wyłączyłeś wszystko");
+        setMessage("PrzyciskWlaczWszystko", "Włącz wszystko");
+        setMessage("PrzyciskWylaczWszystko", "Wyłącz wszystko");
         setMessage("KilofInfo", "Informacje na temat dropu");
         setMessage("DropInfo_KolorNazwyPrzedmiotu", "");
         setMessage("DropInfo_KolorRang", "");
@@ -82,8 +93,7 @@ public final class PluginDrop extends JavaPlugin {
 
 
 
-        getCommand("drop").setExecutor(commands);
-        getServer().getPluginManager().registerEvents(events, this);
+
 
         for(int i = 0; i < events.droppingitems.length; i++)
         {
@@ -119,6 +129,10 @@ public final class PluginDrop extends JavaPlugin {
         offmeta.setDisplayName(messageData.get("PrzyciskWylaczWszystko"));
         off.setItemMeta(offmeta);
         commands.dropmenu.setItem(35,off);
+
+
+
+        menucontent = Commands.dropmenu.getContents();
 
         System.out.println("[NovumDrop] Uruchomienie NovumDrop przebieglo pomyslnie. Jebac Jave");
 

@@ -3,17 +3,25 @@ package pluginy.plugindrop;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.inventory.*;
+import org.bukkit.event.server.BroadcastMessageEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.permissions.Permission;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.scheduler.BukkitTask;
 
+import java.sql.Time;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -25,19 +33,39 @@ import static org.apache.commons.lang.ArrayUtils.indexOf;
 import static org.bukkit.Material.*;
 
 
+
 public class Events implements Listener {
 
+    private final Plugin plugin;
+
+    public Events(Plugin plugin) {
+        this.plugin = plugin;
+        this.plugin.getServer().getPluginManager().registerEvents(this, plugin);
+
+    }
 
     ArrayList<Permission> permisje = new ArrayList<Permission>();
 
+    BukkitTask check;
 
+    public InventoryAction[] pickups = {
+            PICKUP_ALL,
+            PICKUP_HALF,
+            PICKUP_ONE,
+            PICKUP_SOME
+    };
 
+    public InventoryAction[] placings = {
+            PLACE_SOME,
+            PLACE_ALL,
+            PLACE_ONE
+    };
 
     public int[] bonuses = {
             2,
             4,
             5
-            };
+    };
 
     public int[] slots = {
             0,
@@ -103,38 +131,34 @@ public class Events implements Listener {
     ArrayList<ItemStack> dropsy = new ArrayList<ItemStack>();
 
     float[][] chances = {
-            {120, 50,150,100,300,250,140,100, 5, 1, 20,10,10000}, //Gracz
-            {150, 80,190,130,310,300,180,200,10, 3, 40,15,10000}, //VIP
-            {200,100,230,150,320,310,200,300,15, 5, 60,20,10000}, //sVIP
-            {250,150,280,190,330,320,220,400,30, 8, 80,25,10000}, //eVIP
-            {200,100,230,150,320,310,200,300,15, 5, 60,20,10000}, //Youtuber
-            {300,200,320,220,340,350,250,500,50,10,100,30,10000}, //Sponsor
+            {120, 50, 150, 100, 300, 250, 140, 100, 5, 1, 20, 10, 10000}, //Gracz
+            {150, 80, 190, 130, 310, 300, 180, 200, 10, 3, 40, 15, 10000}, //VIP
+            {200, 100, 230, 150, 320, 310, 200, 300, 15, 5, 60, 20, 10000}, //sVIP
+            {250, 150, 280, 190, 330, 320, 220, 400, 30, 8, 80, 25, 10000}, //eVIP
+            {200, 100, 230, 150, 320, 310, 200, 300, 15, 5, 60, 20, 10000}, //Youtuber
+            {300, 200, 320, 220, 340, 350, 250, 500, 50, 10, 100, 30, 10000}, //Sponsor
     };
 
     @EventHandler
-    public void onBlockBreak(BlockBreakEvent event)
-    {
+    public void onBlockBreak(BlockBreakEvent event) {
         Random rand = new Random();
         Player gracz = event.getPlayer();
         Block cube = event.getBlock();
         event.setDropItems(false);
         int ranga = 0;
-        for(int i = 0; i < permisje.size(); i++)
-        {
+        for (int i = 0; i < permisje.size(); i++) {
             if (gracz.hasPermission(permisje.get(i)))
                 ranga = i;
         }
 
 
-        if(contains(droppingBlocks,cube.getType()))
-        {
+        if (contains(droppingBlocks, cube.getType())) {
 
             int toollvl = event.getPlayer().getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS);
-            for(int i = 0; i < dropsy.size(); i++)
-            {
+            for (int i = 0; i < dropsy.size(); i++) {
                 int ranchance = new Random().nextInt(10000);
                 float szansa = chances[ranga][i];
-                if (toollvl > 0) szansa += bonuses[toollvl-1]*100;
+                if (toollvl > 0) szansa += bonuses[toollvl - 1] * 100;
                 if (szansa >= ranchance && enabled[i] == true)
                     gracz.getInventory().addItem(dropsy.get(i));
             }
@@ -144,96 +168,166 @@ public class Events implements Listener {
     }
 
     @EventHandler
-    public void onInventoryClick(InventoryClickEvent event)
-    {
-        if(event.getView().getTitle() == "NovumDrop")
-        {
-            Inventory inventory = event.getClickedInventory(); // The inventory that was clicked in
-            ItemStack item = event.getCurrentItem(); // The item that was clicked
-            int slot = event.getRawSlot();
-            Player gracz = (Player) event.getWhoClicked(); // The player that clicked the item
-            gracz.sendMessage(event.getAction().toString() + " " + event.getClickedInventory().getType().toString() + " " + event.getClickedInventory().toString() + " " + event.getView().getTitle() + " " + slot);
+    public void onInventoryOpen(InventoryOpenEvent open) {
+        ItemStack[] created = PluginDrop.menucontent;
+        HumanEntity gracz = open.getPlayer();
+        Inventory opened = open.getInventory();
 
-            if (slot >= inventory.getSize() + 36 || slot < 0 || item == null || item.getType() == AIR || event.getAction() == MOVE_TO_OTHER_INVENTORY)
-            {
+        gracz.sendMessage((PluginDrop.menucontent.length) + " " + (opened.getContents().length));
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (opened.getContents()[0] != null && opened.getContents()[0].getType() != AIR)
+                    cancel();
+            }
+        }.runTaskTimer(plugin, 0L, 1);
+        check = new BukkitRunnable()
+        {
+
+            @Override
+            public void run() {
+
+                for (int i = 0; i < PluginDrop.menucontent.length; i++)
+                {
+                    if(PluginDrop.menucontent[i] == null && opened.getContents()[i] != null)
+                    {
+
+                        ItemStack inny = Commands.dropmenu.getItem(i);
+                        Commands.dropmenu.clear(i);
+                        gracz.getInventory().addItem(inny);
+                        gracz.closeInventory();
+                        gracz.openInventory(Commands.dropmenu);
+                        cancel();
+                        break;
+                    }
+                }
+            }
+        }.runTaskTimer(plugin, 0L, 20);
+    }
+    @EventHandler
+    public void onInventoryClose(InventoryCloseEvent event)
+    {
+        check.cancel();
+        event.getPlayer().sendMessage("Zatrzymano sprawdzarke");
+    }
+
+    @EventHandler
+    public void onClickInventory(InventoryClickEvent event) {
+        Inventory inventory = event.getClickedInventory(); // The inventory that was clicked in
+        ItemStack item = event.getCurrentItem(); // The item that was clicked
+        int slot = event.getSlot();
+        Player gracz = (Player) event.getWhoClicked(); // The player that clicked the item
+        gracz.sendMessage(event.getAction().toString() + " " + event.getClickedInventory().getType().toString() + " " + event.getView().getTitle() + " " + slot);
+
+        if (event.getView().getTitle() == "NovumDrop" && event.getClick() != ClickType.WINDOW_BORDER_LEFT && event.getClick() != ClickType.WINDOW_BORDER_RIGHT) {
+            /*Inventory inventory = event.getClickedInventory(); // The inventory that was clicked in
+            ItemStack item = event.getCurrentItem(); // The item that was clicked
+            int slot = event.getSlot();
+            Player gracz = (Player) event.getWhoClicked(); // The player that clicked the item
+            gracz.sendMessage(event.getAction().toString() + " " + event.getClickedInventory().getType().toString() + " " + event.getView().getTitle() + " " + slot);*/
+
+            if (slot >= inventory.getSize() || slot < 0) {
+
+                return;
+            }
+
+            if (event.getAction() == MOVE_TO_OTHER_INVENTORY) {
                 event.setCancelled(true);
                 return;
             }
 
-
-
-
-
-            if(event.getClickedInventory().getType() != PLAYER)event.setCancelled(true);
-
-            if (event.isLeftClick() && event.getClickedInventory().getType() != PLAYER)
+           /* if(event.getClickedInventory().getType() == PLAYER && contains(pickups,event.getAction()))
             {
-                
+                pickuped = slot;
+                gracz.sendMessage("Podniesiono od gracza");
+                return;
 
-                if (contains(slots,slot))
-                {
-                    int index = indexOf(droppingitems,item.getType());
+            }*/
 
-                    inventory.remove(item);
-                    ItemStack menuitem = new ItemStack(droppingitems[index],1);
+            if (inventory.getType() != PLAYER && contains(placings, event.getAction())) {
 
-                    if (enabled[index])
-                    {
-                        gracz.sendMessage(PluginDrop.messageData.get("WylaczenieDropu") + " " + item.getItemMeta().getDisplayName());
-                        enabled[index] = false;
-                        SetItemLore(menuitem,PluginDrop.infoDrop(index,false));
+
+                ItemStack cursor = gracz.getItemOnCursor();
+                ItemStack placed = Commands.dropmenu.getItem(slot);
+
+                if (cursor != null)
+                    gracz.getInventory().setItem(gracz.getInventory().firstEmpty(), cursor);
+                else if (placed != null)
+                    gracz.getInventory().setItem(gracz.getInventory().firstEmpty(), placed);
+
+                gracz.setItemOnCursor(null);
+                Commands.dropmenu.clear(slot);
+
+                gracz.closeInventory();
+                gracz.openInventory(Commands.dropmenu);
+                gracz.sendMessage("Położono w customie");
+                gracz.getInventory().setItem(gracz.getInventory().firstEmpty(), placed);
+                return;
+            }
+
+
+            if (event.getClickedInventory().getType() != PLAYER) {
+
+                event.setCancelled(true);
+                event.setResult(Event.Result.DENY);
+
+                if (event.isLeftClick()) {
+                    if (contains(slots, slot)) {
+                        int index = indexOf(droppingitems, item.getType());
+
+                        inventory.remove(item);
+                        ItemStack menuitem = new ItemStack(droppingitems[index], 1);
+
+                        if (enabled[index]) {
+                            gracz.sendMessage(PluginDrop.messageData.get("WylaczenieDropu") + " " + item.getItemMeta().getDisplayName());
+                            enabled[index] = false;
+                            SetItemLore(menuitem, PluginDrop.infoDrop(index, false));
+                        } else {
+                            gracz.sendMessage(PluginDrop.messageData.get("WlaczenieDropu") + " " + item.getItemMeta().getDisplayName());
+                            enabled[index] = true;
+                            SetItemLore(menuitem, PluginDrop.infoDrop(index, true));
+                        }
+                        inventory.setItem(slot, menuitem);
+                    } else if (slot == 34) {
+                        for (int i = 0; i < enabled.length; i++) {
+                            enabled[i] = true;
+                            SetItemLore(inventory.getItem(slots[i]), PluginDrop.infoDrop(i, true));
+                        }
+                        gracz.sendMessage(PluginDrop.messageData.get("WlaczWszystko"));
+                    } else if (slot == 35) {
+                        for (int i = 0; i < slots.length; i++) {
+                            enabled[i] = false;
+                            SetItemLore(inventory.getItem(slots[i]), PluginDrop.infoDrop(i, false));
+                        }
+                        gracz.sendMessage(PluginDrop.messageData.get("WylaczWszystko"));
                     }
-                    else
-                    {
-                        gracz.sendMessage(PluginDrop.messageData.get("WlaczenieDropu") + " " + item.getItemMeta().getDisplayName());
-                        enabled[index] = true;
-                        SetItemLore(menuitem,PluginDrop.infoDrop(index,true));
-                    }
-                    inventory.setItem(slot,menuitem);
-                }
-                else if (slot == 34)
-                {
-                    for (int i = 0; i < enabled.length; i++)
-                    {
-                        enabled[i] = true;
-                        SetItemLore(inventory.getItem(slots[i]),PluginDrop.infoDrop(i,true));
-                    }
-                    gracz.sendMessage(PluginDrop.messageData.get("WlaczWszystko"));
-                }
-                else if (slot == 35)
-                {
-                    for (int i = 0; i < slots.length; i++)
-                    {
-                        enabled[i] = false;
-                        SetItemLore(inventory.getItem(slots[i]),PluginDrop.infoDrop(i,false));
-                    }
-                    gracz.sendMessage(PluginDrop.messageData.get("WylaczWszystko"));
                 }
             }
+            return;
         }
-
+        gracz.sendMessage("DUPA");
+        return;
     }
 
-    public static void AddToMenu(Material material, int menuslot, Inventory menu, List<String> opis)
-    {
-        ItemStack item = new ItemStack(material,1);
+    public static void AddToMenu(Material material, int menuslot, Inventory menu, List<String> opis) {
+        ItemStack item = new ItemStack(material, 1);
         ItemMeta mitemmeta = item.getItemMeta();
         mitemmeta.setLore(opis);
         item.setItemMeta(mitemmeta);
-        menu.setItem(menuslot,item);
+        menu.setItem(menuslot, item);
     }
 
-    public static void SetItemName(ItemStack item, String opis)
-    {
+    public static void SetItemName(ItemStack item, String opis) {
         ItemMeta mitemmeta = item.getItemMeta();
         mitemmeta.setDisplayName(opis);
         item.setItemMeta(mitemmeta);
     }
 
-    public static void SetItemLore(ItemStack item, List<String> opis)
-    {
+    public static void SetItemLore(ItemStack item, List<String> opis) {
         ItemMeta mitemmeta = item.getItemMeta();
         mitemmeta.setLore(opis);
         item.setItemMeta(mitemmeta);
+
     }
 }
+
