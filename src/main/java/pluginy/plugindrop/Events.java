@@ -169,18 +169,18 @@ public class Events implements Listener {
 
     @EventHandler
     public void onInventoryOpen(InventoryOpenEvent open) {
-        ItemStack[] created = PluginDrop.menucontent;
+
         HumanEntity gracz = open.getPlayer();
         Inventory opened = open.getInventory();
 
-        gracz.sendMessage((PluginDrop.menucontent.length) + " " + (opened.getContents().length));
+
         new BukkitRunnable() {
             @Override
             public void run() {
                 if (opened.getContents()[0] != null && opened.getContents()[0].getType() != AIR)
                     cancel();
             }
-        }.runTaskTimer(plugin, 0L, 1);
+        }.runTaskTimer(plugin, 0L, 1L);
         check = new BukkitRunnable()
         {
 
@@ -194,21 +194,17 @@ public class Events implements Listener {
 
                         ItemStack inny = Commands.dropmenu.getItem(i);
                         Commands.dropmenu.clear(i);
-                        gracz.getInventory().addItem(inny);
-                        gracz.closeInventory();
-                        gracz.openInventory(Commands.dropmenu);
-                        cancel();
+                        gracz.setItemOnCursor(inny);
                         break;
                     }
                 }
             }
-        }.runTaskTimer(plugin, 0L, 20);
+        }.runTaskTimer(plugin, 0L, 1L);
     }
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event)
     {
         check.cancel();
-        event.getPlayer().sendMessage("Zatrzymano sprawdzarke");
     }
 
     @EventHandler
@@ -217,60 +213,19 @@ public class Events implements Listener {
         ItemStack item = event.getCurrentItem(); // The item that was clicked
         int slot = event.getSlot();
         Player gracz = (Player) event.getWhoClicked(); // The player that clicked the item
-        gracz.sendMessage(event.getAction().toString() + " " + event.getClickedInventory().getType().toString() + " " + event.getView().getTitle() + " " + slot);
 
-        if (event.getView().getTitle() == "NovumDrop" && event.getClick() != ClickType.WINDOW_BORDER_LEFT && event.getClick() != ClickType.WINDOW_BORDER_RIGHT) {
-            /*Inventory inventory = event.getClickedInventory(); // The inventory that was clicked in
-            ItemStack item = event.getCurrentItem(); // The item that was clicked
-            int slot = event.getSlot();
-            Player gracz = (Player) event.getWhoClicked(); // The player that clicked the item
-            gracz.sendMessage(event.getAction().toString() + " " + event.getClickedInventory().getType().toString() + " " + event.getView().getTitle() + " " + slot);*/
-
-            if (slot >= inventory.getSize() || slot < 0) {
-
-                return;
-            }
-
-            if (event.getAction() == MOVE_TO_OTHER_INVENTORY) {
-                event.setCancelled(true);
-                return;
-            }
-
-           /* if(event.getClickedInventory().getType() == PLAYER && contains(pickups,event.getAction()))
+        if (event.getView().getTitle() == "NovumDrop" && event.getClick() != ClickType.WINDOW_BORDER_LEFT && event.getClick() != ClickType.WINDOW_BORDER_RIGHT)
+        {
+            if (slot >= inventory.getSize() || slot < 0)
             {
-                pickuped = slot;
-                gracz.sendMessage("Podniesiono od gracza");
-                return;
-
-            }*/
-
-            if (inventory.getType() != PLAYER && contains(placings, event.getAction())) {
-
-
-                ItemStack cursor = gracz.getItemOnCursor();
-                ItemStack placed = Commands.dropmenu.getItem(slot);
-
-                if (cursor != null)
-                    gracz.getInventory().setItem(gracz.getInventory().firstEmpty(), cursor);
-                else if (placed != null)
-                    gracz.getInventory().setItem(gracz.getInventory().firstEmpty(), placed);
-
-                gracz.setItemOnCursor(null);
-                Commands.dropmenu.clear(slot);
-
-                gracz.closeInventory();
-                gracz.openInventory(Commands.dropmenu);
-                gracz.sendMessage("Położono w customie");
-                gracz.getInventory().setItem(gracz.getInventory().firstEmpty(), placed);
                 return;
             }
-
-
-            if (event.getClickedInventory().getType() != PLAYER) {
+            if (event.getClickedInventory().getType() != PLAYER || event.getAction() == MOVE_TO_OTHER_INVENTORY) {
 
                 event.setCancelled(true);
                 event.setResult(Event.Result.DENY);
-
+            }
+            if (event.getClickedInventory().getType() != PLAYER) {
                 if (event.isLeftClick()) {
                     if (contains(slots, slot)) {
                         int index = indexOf(droppingitems, item.getType());
@@ -279,11 +234,11 @@ public class Events implements Listener {
                         ItemStack menuitem = new ItemStack(droppingitems[index], 1);
 
                         if (enabled[index]) {
-                            gracz.sendMessage(PluginDrop.messageData.get("WylaczenieDropu") + " " + item.getItemMeta().getDisplayName());
+
                             enabled[index] = false;
                             SetItemLore(menuitem, PluginDrop.infoDrop(index, false));
                         } else {
-                            gracz.sendMessage(PluginDrop.messageData.get("WlaczenieDropu") + " " + item.getItemMeta().getDisplayName());
+
                             enabled[index] = true;
                             SetItemLore(menuitem, PluginDrop.infoDrop(index, true));
                         }
@@ -305,7 +260,7 @@ public class Events implements Listener {
             }
             return;
         }
-        gracz.sendMessage("DUPA");
+
         return;
     }
 
