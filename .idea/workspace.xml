@@ -6,6 +6,7 @@
       <change beforePath="$PROJECT_DIR$/src/main/java/pluginy/plugindrop/Events.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pluginy/plugindrop/Events.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/PluginDrop-1.0-SNAPSHOT-shaded.jar" beforeDir="false" afterPath="$PROJECT_DIR$/target/PluginDrop-1.0-SNAPSHOT-shaded.jar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/PluginDrop-1.0-SNAPSHOT.jar" beforeDir="false" afterPath="$PROJECT_DIR$/target/PluginDrop-1.0-SNAPSHOT.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/pluginy/plugindrop/Events$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/pluginy/plugindrop/Events$1.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/pluginy/plugindrop/Events$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/pluginy/plugindrop/Events$2.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/pluginy/plugindrop/Events.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/pluginy/plugindrop/Events.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/original-PluginDrop-1.0-SNAPSHOT.jar" beforeDir="false" afterPath="$PROJECT_DIR$/target/original-PluginDrop-1.0-SNAPSHOT.jar" afterDir="false" />
@@ -120,22 +121,22 @@
       <screen x="0" y="0" width="1280" height="720" />
     </state>
     <state x="280" y="0" key="CommitChangelistDialog2/0.0.1280.720@0.0.1280.720" timestamp="1584375591423" />
-    <state width="1237" height="189" key="GridCell.Tab.0.bottom" timestamp="1585516119595">
+    <state width="1237" height="189" key="GridCell.Tab.0.bottom" timestamp="1585799717468">
       <screen x="0" y="0" width="1280" height="720" />
     </state>
-    <state width="1237" height="189" key="GridCell.Tab.0.bottom/0.0.1280.720@0.0.1280.720" timestamp="1585516119595" />
-    <state width="1237" height="189" key="GridCell.Tab.0.center" timestamp="1585516119595">
+    <state width="1237" height="189" key="GridCell.Tab.0.bottom/0.0.1280.720@0.0.1280.720" timestamp="1585799717468" />
+    <state width="1237" height="189" key="GridCell.Tab.0.center" timestamp="1585799717468">
       <screen x="0" y="0" width="1280" height="720" />
     </state>
-    <state width="1237" height="189" key="GridCell.Tab.0.center/0.0.1280.720@0.0.1280.720" timestamp="1585516119595" />
-    <state width="1237" height="189" key="GridCell.Tab.0.left" timestamp="1585516119594">
+    <state width="1237" height="189" key="GridCell.Tab.0.center/0.0.1280.720@0.0.1280.720" timestamp="1585799717468" />
+    <state width="1237" height="189" key="GridCell.Tab.0.left" timestamp="1585799717468">
       <screen x="0" y="0" width="1280" height="720" />
     </state>
-    <state width="1237" height="189" key="GridCell.Tab.0.left/0.0.1280.720@0.0.1280.720" timestamp="1585516119594" />
-    <state width="1237" height="189" key="GridCell.Tab.0.right" timestamp="1585516119595">
+    <state width="1237" height="189" key="GridCell.Tab.0.left/0.0.1280.720@0.0.1280.720" timestamp="1585799717468" />
+    <state width="1237" height="189" key="GridCell.Tab.0.right" timestamp="1585799717468">
       <screen x="0" y="0" width="1280" height="720" />
     </state>
-    <state width="1237" height="189" key="GridCell.Tab.0.right/0.0.1280.720@0.0.1280.720" timestamp="1585516119595" />
+    <state width="1237" height="189" key="GridCell.Tab.0.right/0.0.1280.720@0.0.1280.720" timestamp="1585799717468" />
     <state x="142" y="3" key="SettingsEditor" timestamp="1583967162447">
       <screen x="0" y="0" width="1280" height="720" />
     </state>
@@ -156,9 +157,9 @@
       <screen x="0" y="0" width="1280" height="720" />
     </state>
     <state x="297" y="161" key="run.anything.popup/0.0.1280.720@0.0.1280.720" timestamp="1585511965259" />
-    <state x="318" y="41" width="672" height="678" key="search.everywhere.popup" timestamp="1585177400670">
+    <state x="318" y="41" width="672" height="678" key="search.everywhere.popup" timestamp="1585795784502">
       <screen x="0" y="0" width="1280" height="720" />
     </state>
-    <state x="318" y="41" width="672" height="678" key="search.everywhere.popup/0.0.1280.720@0.0.1280.720" timestamp="1585177400670" />
+    <state x="318" y="41" width="672" height="678" key="search.everywhere.popup/0.0.1280.720@0.0.1280.720" timestamp="1585795784502" />
   </component>
 </project>

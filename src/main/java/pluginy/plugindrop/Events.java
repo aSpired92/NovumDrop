@@ -2,6 +2,7 @@ package pluginy.plugindrop;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.command.Command;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -160,8 +161,19 @@ public class Events implements Listener {
                 float szansa = chances[ranga][i];
                 if (toollvl > 0) szansa += bonuses[toollvl - 1] * 100;
                 if (szansa >= ranchance && enabled[i] == true)
-                    gracz.getInventory().addItem(dropsy.get(i));
+                {
+                    if(CheckIfFit(dropsy.get(i),gracz)) {
+                        gracz.getInventory().addItem(dropsy.get(i));
+                    }
+                    else {
+                        gracz.getWorld().dropItemNaturally(gracz.getLocation(), dropsy.get(i));
+                    }
+
+                }
+
             }
+            gracz.giveExp(2);
+
 
         }
 
@@ -170,53 +182,59 @@ public class Events implements Listener {
     @EventHandler
     public void onInventoryOpen(InventoryOpenEvent open) {
 
-        HumanEntity gracz = open.getPlayer();
-        Inventory opened = open.getInventory();
 
-
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (opened.getContents()[0] != null && opened.getContents()[0].getType() != AIR)
-                    cancel();
-            }
-        }.runTaskTimer(plugin, 0L, 1L);
-        check = new BukkitRunnable()
+        if(open.getView().getTitle() == "NovumDrop")
         {
+            HumanEntity gracz = open.getPlayer();
+            Inventory opened = open.getInventory();
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    if (opened.getContents()[0] != null && opened.getContents()[0].getType() != AIR)
+                        cancel();
+                }
+            }.runTaskTimer(plugin, 0L, 1L);
+            check = new BukkitRunnable()
+            {
 
-            @Override
-            public void run() {
+                @Override
+                public void run() {
 
-                for (int i = 0; i < PluginDrop.menucontent.length; i++)
-                {
-                    if(PluginDrop.menucontent[i] == null && opened.getContents()[i] != null)
+                    for (int i = 0; i < PluginDrop.menucontent.length; i++)
                     {
+                        if(PluginDrop.menucontent[i] == null && opened.getContents()[i] != null)
+                        {
 
-                        ItemStack inny = Commands.dropmenu.getItem(i);
-                        Commands.dropmenu.clear(i);
-                        gracz.setItemOnCursor(inny);
-                        break;
+                            ItemStack inny = Commands.dropmenu.getItem(i);
+                            Commands.dropmenu.clear(i);
+                            gracz.setItemOnCursor(inny);
+                            break;
+                        }
                     }
                 }
-            }
-        }.runTaskTimer(plugin, 0L, 1L);
+            }.runTaskTimer(plugin, 0L, 1L);
+        }
     }
+
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event)
     {
-        check.cancel();
+        if(event.getView().getTitle() == "NovumDrop")
+            check.cancel();
     }
 
     @EventHandler
     public void onClickInventory(InventoryClickEvent event) {
-        Inventory inventory = event.getClickedInventory(); // The inventory that was clicked in
-        ItemStack item = event.getCurrentItem(); // The item that was clicked
-        int slot = event.getSlot();
-        Player gracz = (Player) event.getWhoClicked(); // The player that clicked the item
+
 
         if (event.getView().getTitle() == "NovumDrop" && event.getClick() != ClickType.WINDOW_BORDER_LEFT && event.getClick() != ClickType.WINDOW_BORDER_RIGHT)
         {
-            if (slot >= inventory.getSize() || slot < 0)
+            Inventory inventory = event.getClickedInventory(); // The inventory that was clicked in
+            ItemStack item = event.getCurrentItem(); // The item that was clicked
+            int slot = event.getSlot();
+            Player gracz = (Player) event.getWhoClicked(); // The player that clicked the item
+
+            if (slot >= 72 || slot < 0)
             {
                 return;
             }
@@ -283,6 +301,20 @@ public class Events implements Listener {
         mitemmeta.setLore(opis);
         item.setItemMeta(mitemmeta);
 
+    }
+
+    public boolean CheckIfFit(ItemStack item, Player player)
+    {
+        if (player.getInventory().firstEmpty() > -1 && player.getInventory().firstEmpty() < 36) return true;
+        for (int i = 0;i < 36;i++)
+        {
+            if(player.getInventory().getContents()[i].getType() == item.getType() && player.getInventory().getContents()[i].getAmount() < item.getType().getMaxStackSize())
+            {
+                return true;
+            }
+
+        }
+        return false;
     }
 }
 
